@@ -38,12 +38,16 @@ const StackNavigator = createStackNavigator({
   },
   ProductDetails : ProductDetails,
   Cart : Cart,
-  //Profile : Profile,
 });
 
 
 const DrawerNavigator = createDrawerNavigator({
-  DashBoard: StackNavigator,
+  DashBoard: {
+    screen : StackNavigator,
+    navigationOptions :{
+      drawerLabel : () => null
+    }
+  },
   Profile : Profile,
   SignOut : SignOut,
   },{
