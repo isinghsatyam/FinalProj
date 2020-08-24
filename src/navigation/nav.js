@@ -9,45 +9,55 @@ import AuthResolve from '../navigation/AuthResolve';
 import DashBoard from '../screens/DashBoard';
 import Cart from '../screens/Cart';
 import CartButton from '../utility/components/CartButton';
+import DrawerButton from '../utility/components/DrawerButton';
 import ProductDetails from '../screens/ProductDetails';
 import SignOut from '../utility/components/SignOut';
-import Profile from '../screens/Profile'
-
-const DrawerNavigator = createDrawerNavigator({
-  DashBoard: DashBoard,
-  SignOut : SignOut,
-  Profile : Profile
- }
-);
+import Profile from '../screens/Profile';
+import CustomDrawer from '../utility/components/CustomDrawer';
 
 const StackNavigator = createStackNavigator({
-  DrawerNavigator : {
-    screen : DrawerNavigator,
+  DashBoard : {
+    screen : DashBoard,
     navigationOptions :{
       title: 'Dashboard',
-        headerRight: ()=>  (
-            <CartButton />
-            ),
-        headerStyle: {
-          backgroundColor: '#e3e3e3'
-        },
-        headerStyle :{
-          borderBottomColor : 'red',
-          borderBottomWidth: 3,
-        },
-        headerTintColor: '#606070',
+      headerRight: ()=>  (
+          <CartButton />
+          ),
+      headerLeft: ()=>  (
+        <DrawerButton />
+        ),
+      headerStyle: {
+        backgroundColor: '#e3e3e3'
+      },
+      headerStyle :{
+        borderBottomColor : 'red',
+        borderBottomWidth: 3,
+      },
+      headerTintColor: '#606070',
     }
   },
   ProductDetails : ProductDetails,
   Cart : Cart,
+  //Profile : Profile,
 });
+
+
+const DrawerNavigator = createDrawerNavigator({
+  DashBoard: StackNavigator,
+  Profile : Profile,
+  SignOut : SignOut,
+  },{
+     contentComponent : CustomDrawer
+ }
+);
+
 
 const SwitchNavigator = createSwitchNavigator(
   {
     AuthResolve: AuthResolve,
     SignIn: SignIn,
     SignUp: SignUp,
-    StackNavigator: StackNavigator,
+    DrawerNavigator: DrawerNavigator,
     SignOut : SignOut
   },
   {

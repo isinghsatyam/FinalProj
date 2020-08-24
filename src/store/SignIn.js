@@ -2,12 +2,11 @@ import { observable, action, computed } from "mobx";
 import { getUserFromDatabase } from "../database/AuthHandler";
 
 class SignIn {
-    @observable userDetails = [];
+    @observable userDetails = {};
 
     @action getUserFromDatabase = (email) => {
         getUserFromDatabase(email).then((res) => {
           this.userDetails = res;
-          console.log(this.userDetails)
         }).catch((error) => {
           console.log(error);
         });

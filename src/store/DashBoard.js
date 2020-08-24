@@ -1,11 +1,11 @@
 import { observable, action, computed } from "mobx";
 
 class DashBoard {
-    @observable itemList = [];
+    @observable productList = [];
     @observable pageNo = 1;
     @observable isLoading = true;
 
-    @action fetchItems = () => {
+    @action fetchProducts = (sortProducts) => {
         fetch('https://preprod.vestigebestdeals.com/api/rest/dynamickittingproductlistwithfiltersortwarehouse ', 
         {
             method: 'POST',
@@ -17,13 +17,13 @@ class DashBoard {
                     "category_id":13,
                     "filter": "",
                     "page_num":this.pageNo,
-                    "sort":"",
+                    "sort":sortProducts,
                     "customer_id":96,
                     "wcode":"DWK,HWH,S71" 
             })
         }).then(res => res.json())
             .then((res) =>{
-            this.itemList = [...this.itemList, ...res.data.items];
+            this.productList = [...this.productList, ...res.data.items];
             this.pageNo += 1;
         }
          ).catch(error => {
@@ -31,8 +31,13 @@ class DashBoard {
         }).finally(() => this.isLoading = false)
     };
 
-    @computed get getItemList() {
-        return this.itemList;
+    @action clearProductList = () => {
+        this.productList = [];
+        this.pageNo = 1;
+        console.log(this.productList);
+    }
+    @computed get getproductList() {
+        return this.productList;
     }
 }
 export default DashBoard;

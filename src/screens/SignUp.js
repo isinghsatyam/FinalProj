@@ -32,7 +32,7 @@ export default class SignUp extends Component {
         };
     }
     validateUsername = () => {
-        const usernameReg = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,15}$/;
+        const usernameReg = /^[a-zA-Z ]{2,30}$/;
         (usernameReg.test(this.state.username)) ? this.setState({ isUsernameValid: true }) : this.setState({ isUsernameValid: false });
     }
     validateEmail = () => {
@@ -73,13 +73,13 @@ export default class SignUp extends Component {
                 }      
             }
             else if (!this.state.isUsernameValid ){
-              Alert.alert('Wrong Input', 'Please Enter Valid username')
+              Alert.alert('Invalid input', 'Name can only contain alphabets and space')
             }
             else if (!this.state.isEmailValid ){
-              Alert.alert('Wrong Input', 'Please Enter Valid email')
+              Alert.alert('Invalid input', 'Email must be in proper format (eg. example@email.com)')
             }
             else if (!this.state.isPasswordValid ){
-              Alert.alert('Wrong Input', 'Please Enter Valid password')
+              Alert.alert('Invalid input', 'Password must contain {a capital letter,a special character, a number & 8-15char long} eg.- Example@1')
             }
         }catch(error){
             alert(error);

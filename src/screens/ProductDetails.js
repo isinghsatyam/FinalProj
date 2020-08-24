@@ -121,7 +121,7 @@ class ProductDetails extends Component{
                         <Text style={styles.text}>Updated at : {itemDetails.updated_at}</Text>
                         <View style={styles.itemSeparator}/>
                         <Text style ={styles.headingText}>Review :</Text>
-                        { itemReview.map((item, key)=>(
+                        {itemReview.map((item, key)=>(
                             <View key={key}>
                                 <Text  style={styles.text}>{item.date} </Text>
                                 <Text  style={styles.text}>{item.nickname}</Text>
@@ -129,7 +129,7 @@ class ProductDetails extends Component{
                                 <Text  style={styles.text}>{item.vote}</Text>
                                 <View style={styles.reviewSeparator}/>
                             </View>
-                            ))                          
+                            ))                         
                         }
                      </ScrollView>                 
                     </View>

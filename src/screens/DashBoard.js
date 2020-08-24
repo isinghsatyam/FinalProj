@@ -10,6 +10,7 @@ import {
     FlatList
 } from "react-native";
 import { inject, observer } from 'mobx-react';
+import  Modal  from "react-native-modal";
 
 @inject('dashBoard')
 @observer
@@ -17,28 +18,51 @@ export default class DashBoard extends Component{
     constructor(props) {
         super(props);
         this.props = props;
-        this.props.dashBoard.fetchItems();
         this.state ={
-           // productId = ''
-           // isLoading : true
+            isGridView : false,
+            isModalVisible : false,
+            cardFlexDirection : 'row',
+            buttonText : 'Grid View',
+            sortProducts : '',
         }
+        this.props.dashBoard.fetchProducts(this.state.sortProducts);
     }
+
+    changeFlatlistView = () => {
+        this.setState({ isGridView: !this.state.isGridView }, () => {
+            if (this.state.isGridView) {
+                this.setState({ buttonText: 'List View' });
+                this.setState({cardFlexDirection : 'column'})
+            }
+            else {
+              this.setState({ buttonText: 'Grid View' });
+              this.setState({cardFlexDirection : 'row'})
+            }
+        });
+    }
+
+    toggleModal = () => {
+        this.setState({isModalVisible: !this.state.isModalVisible});
+    };
+
     render(){
-        const {itemList, fetchItems, isLoading } = this.props.dashBoard;
+        const {productList, fetchProducts, isLoading, clearProductList } = this.props.dashBoard;
         const { navigate } = this.props.navigation;
         return(
             <View style={styles.container}>
-            <StatusBar backgroundColor="#0BDB8F" barStyle="light-content" />
+            <StatusBar backgroundColor="#f04800" barStyle="light-content" />
                 <View style={styles.upperScreen}>
                 {isLoading ? <ActivityIndicator size='large' color='red' animating/>
                 : (
                     <FlatList 
                         style={styles.upperScreen}
-                        keyExtractor = {(item, index) => item.product_id}
-                        data={itemList}
+                        keyExtractor = {(item, index) => String(index)}
+                        data={productList}
+                        key={this.state.isGridView}
+                        numColumns={this.state.isGridView ? 2: 1}
                         renderItem = {({item}) =>{
                             return (
-                                <TouchableOpacity style={styles.flatList} 
+                                <TouchableOpacity style={[styles.flatList,{flexDirection : this.state.cardFlexDirection}]} 
                                 onPress={() => navigate('ProductDetails', { productId : item.product_id })} >
                                     <View style={styles.flatListItemLeft}>
                                         <Image source={{ uri: item.images }} style={styles.imageView} /> 
@@ -51,20 +75,54 @@ export default class DashBoard extends Component{
                                 </TouchableOpacity>
                             )
                         }}
-                        onEndReached={() => fetchItems()}
-                        onEndReachedThreshold={4}
+                        onEndReached={() => fetchProducts(this.state.sortProducts)}
+                        onEndReachedThreshold={6}
                     />
                 )}
                 </View>
                 <View style={styles.lowerScreen}>
                     <View style={styles.buttonPosition}>
-                        <TouchableOpacity style={styles.button} onPress ={this.fetchItems}>
-                            <Text style ={styles.buttonText}> Sort By</Text>
+                        <TouchableOpacity style={styles.button} onPress ={this.toggleModal}>
+                                <Text style ={styles.buttonText}> Sort By</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.button}>
-                            <Text style ={styles.buttonText}> Grid View</Text>
+                        <TouchableOpacity style={styles.button} onPress={this.changeFlatlistView}>
+                                <Text style ={styles.buttonText}>{this.state.buttonText}</Text>   
                         </TouchableOpacity>
                     </View>
+
+                    <Modal 
+                    isVisible={this.state.isModalVisible} 
+                    onBackdropPress={this.toggleModal}
+                    style={styles.sortModal}>
+                        <TouchableOpacity 
+                        style={styles.sortModalButton} 
+                        onPress={() => {
+                                this.setState({sortProducts : 'price_desc'});
+                                clearProductList;
+                                fetchProducts(this.state.sortProducts);
+                                this.toggleModal();}}
+                        >
+                            <Text style={styles.sortModalButtonText}>Price High to Low</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                        style={styles.sortModalButton}
+                        onPress={() => {
+                                this.setState({sortProducts : 'price_asc'});
+                                clearProductList;
+                                fetchProducts(this.state.sortProducts);
+                                this.toggleModal();}}
+                        >
+                            <Text style={styles.sortModalButtonText}>Price Low to High</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                        style={styles.sortModalButton}
+                        onPress={() => {
+                            this.state.sortProducts({sortProducts : ''});
+                            fetchProducts(this.state.sortProducts);
+                            this.toggleModal();}}>
+                            <Text style={styles.sortModalButtonText}>Reset</Text>
+                        </TouchableOpacity>
+                    </Modal>
                 </View>
             </View>
         )
@@ -77,18 +135,16 @@ const styles = StyleSheet.create({
         backgroundColor:'#edeff2',
     },
     upperScreen: {
-        flex: 0.91,
+        flex: 0.92,
         backgroundColor : '#0BDB8F',
         paddingBottom : 5,
     },
     lowerScreen: {
-        flex: 0.09,
+        flex: 0.08,
         justifyContent: 'flex-start',
-        backgroundColor: '#0BDB8F', 
     },
     flatList :{
         flex : 1,
-        flexDirection : 'row',
         backgroundColor : '#fff',
         paddingVertical: 10,
         paddingHorizontal: 10,
@@ -99,7 +155,8 @@ const styles = StyleSheet.create({
     imageView: {
         width: 100,
         height: 100,
-        margin : 5
+        margin : 5,
+        alignSelf : 'center'
     },   
     text: {
         fontSize: 18,
@@ -114,7 +171,7 @@ const styles = StyleSheet.create({
     },
     flatListItemLeft :{
         flex : 0.3,
-        justifyContent : 'center'
+        justifyContent : 'center',
     },
     flatListItemRight :{
         flex : 0.7,
@@ -122,7 +179,6 @@ const styles = StyleSheet.create({
     buttonPosition: {
         flexDirection: 'row',
         flex :1,
-        backgroundColor : '#dee0e3',
         borderTopRightRadius : 10,
         borderTopLeftRadius : 10
     },
@@ -132,12 +188,33 @@ const styles = StyleSheet.create({
         borderLeftWidth : 1,
         borderRightColor : '#3d3f42',
         borderLeftColor : '#3d3f42',
-        justifyContent : 'center'
+        justifyContent : 'center',
+        backgroundColor : '#f04800',        
     },
     buttonText: {
         fontSize: 25,
         fontWeight: 'bold',
-        color: '#b52309',
+        color: '#fff',
         alignSelf : 'center',  
     },
-})
+    sortModal : {
+        flex : 0.9,
+        justifyContent : 'flex-end'
+    },
+    sortModalButton:{
+        flex:0.1,
+        justifyContent : 'center',
+        alignItems :'center',
+        backgroundColor:'#ffffff',
+        borderColor : '#f04800',
+        borderWidth : 1,
+        borderRadius : 10
+    },
+    sortModalButtonText :{      
+        fontSize: 25,
+        fontWeight: 'bold',
+        color: '#0BDB8F',
+        alignSelf : 'center',
+    }
+});
+

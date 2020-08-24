@@ -12,7 +12,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-community/async-storage'; 
 import { inject, observer } from 'mobx-react';
-import { LoginManager } from 'react-native-fbsdk';
+import { LoginManager } from "react-native-fbsdk";
 
 @inject('signIn')
 @observer
@@ -25,13 +25,12 @@ class SignIn extends Component {
             password: '',
             isEmailValid: false,
             isPasswordValid: false,
-            userValid : false
         }
     }
 
     validateEmail = () => {
         const emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-        (emailReg.test(this.state.email)) ?( this.props.signIn.getUserFromDatabase(this.state.email), this.setState({ isEmailValid: true })) : this.setState({ isEmailValid: false });
+        (emailReg.test(this.state.email)) ? (this.setState({ isEmailValid: true })) : this.setState({ isEmailValid: false });
     }
     validatePassword = () => {
         const passwordReg = /^(?=.*\d)(?=.*[!@#$%^&*.])(?=.*[a-z])(?=.*[A-Z]).{8,15}$/;
@@ -40,24 +39,20 @@ class SignIn extends Component {
 
     AuthenticateUser = async () =>{
         try{
-            const {userDetails} = this.props.signIn;
-            console.log(userDetails)
+            
             if ((this.state.email == '' && this.state.password == '')) {
                 Alert.alert('Empty field', 'Please Enter some value')
             }
             else if (this.state.isEmailValid && this.state.isPasswordValid) {
-                for (let user of userDetails) {
-                  if (user.email === this.state.email && user.password === this.state.password) {
-                        this.setState({userValid : true})
-                      }
-                }
-                if(this.state.userValid){
-                  await AsyncStorage.setItem('token', this.state.email)
-                  this.props.navigation.navigate('DashBoard')
-                }
-                else{
-                  Alert.alert('Wrong Input', 'Please Enter correct detail')
-                }
+              await this.props.signIn.getUserFromDatabase(this.state.email);
+              const {userDetails} = this.props.signIn;
+              if (userDetails.email === this.state.email && userDetails.password === this.state.password){
+                await AsyncStorage.setItem('token', this.state.email)
+                this.props.navigation.navigate('DashBoard')
+              }
+              else{
+                Alert.alert('Wrong Input', 'Please Enter correct detail')
+              }
             }
             else {
                 Alert.alert('invalid Input', 'Please Enter valid detail')
