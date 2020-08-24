@@ -134,6 +134,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     splits {
         abi {
@@ -196,6 +197,7 @@ dependencies {
     implementation project(':realm')
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation 'com.android.support:support-v4:26.1.0'
+    implementation project(':react-native-fbsdk')
     
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
