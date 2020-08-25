@@ -7,12 +7,16 @@ import {
   Alert,
   StyleSheet,
   StatusBar,
+  Button
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-community/async-storage'; 
 import { inject, observer } from 'mobx-react';
-import { LoginManager } from "react-native-fbsdk";
+import { 
+  LoginManager,
+  AccessToken,
+} from 'react-native-fbsdk';
 
 @inject('signIn')
 @observer
@@ -63,21 +67,42 @@ class SignIn extends Component {
         
     }
 
-    handleFacebookLogin () {
-      LoginManager.logInWithReadPermissions(['public_profile', 'email', 'user_friends']).then(
-        function (result) {
-          if (result.isCancelled) {
-            console.log('Login cancelled')
-          } else {
-            console.log('Login success with permissions: ' + result.grantedPermissions.toString())
-            this.props.navigation.navigate('DashBoard');
-          }
-        },
-        function (error) {
-          console.log('Login fail with error: ' + error)
+    handleFacebookLogin = () => {
+      const { navigate } = this.props.navigation;
+      const { addSocialInfo } = this.props.signIn;
+
+      LoginManager.logInWithPermissions(['public_profile', 'email']).then(
+      function (result) {
+        if (result.isCancelled) {
+          console.log('login is cancelled.')
+        } else {
+          AccessToken.getCurrentAccessToken().then((data) => {
+            fetch('https://graph.facebook.com/v2.5/me?fields=email,name,picture&access_token='+ data.accessToken.toString())
+            .then((response) => response.json())
+            .then((res) => {
+              let socialInfo ={
+                username : res.name,
+                email : res.email,
+                image_path : res.picture.data.url,
+              }
+              console.log(res)
+              console.log(data.accessToken.toString())
+              addSocialInfo(socialInfo)
+              AsyncStorage.setItem('token', socialInfo.email)
+              navigate('DashBoard');
+          })
+        })
+        console.log(
+          "Login success with permissions: " +
+            result.grantedPermissions.toString()
+        );
         }
-      )
-    }
+      },
+      function(error) {
+        console.log("Login fail with error: " + error);
+      }
+    );
+  }
 
   render() {
     const { navigate } = this.props.navigation;
@@ -218,6 +243,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     color: '#42275a',
     paddingTop : 15,
+    marginBottom : 20
   }
 });
 
